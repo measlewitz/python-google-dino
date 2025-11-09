@@ -1,46 +1,45 @@
 import sys
-from tkinter import *
-import tkinter.font as tkFont
+import pygame
+pygame.init()
 
-def center_window(window):
-    window.update_idletasks()
+screen = pygame.display.set_mode((750, 250))
+screen.fill((255,255,255))
+pygame.display.set_caption("Dino Game")
+clock = pygame.time.Clock()
 
-    screen_width = window.winfo_screenwidth()
-    screen_height = window.winfo_screenheight()
-
-    x = (screen_width - 750)//2
-    y = (screen_height - 250)//2
-
-    window.geometry(f"{750}x{250}+{x}+{y}")
+pygame.font.init()
+font = pygame.font.SysFont("Arial", 25, True)
+text = font.render("press space-bar to start", True, (0,0,0))
+label = text.get_rect(
+    centerx=screen.get_rect().centerx,
+    centery=screen.get_rect().top + 50
+)
 
 gameStarted = False
-def on_space_press(event):
+def on_space_press():
     global gameStarted
-    if not bool(gameStarted):
-        label.pack_forget()
+    if not gameStarted:
         gameStarted = True
     else:
         print("jumping")
 
-def on_escape_press(event):
+def exit():
+    pygame.quit()
     sys.exit()
 
-root = Tk()
-root.title("Dino Game")
-center_window(root)
-root.resizable(False, False)
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                on_space_press()
+            elif event.key == pygame.K_ESCAPE:
+                exit()
 
-#set window above everything else
-root.attributes("-topmost", True)
-#force it to process
-root.update()
-#allow it to be unfocused again
-root.attributes("-topmost",False)
+    screen.fill((255,255,255))
 
-font = tkFont.Font(family="Arial", size = 25, weight="bold")
-label = Label(root, text = "press the spacebar to start",font=font)
-label.pack(anchor = "center")
+    if not gameStarted:
+        screen.blit(text, label)
 
-root.bind("<space>", on_space_press)
-root.bind("<Escape>", on_escape_press)
-root.mainloop()
+    pygame.display.flip()
