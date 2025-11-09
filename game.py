@@ -15,6 +15,12 @@ label = text.get_rect(
     centery=screen.get_rect().top + 50
 )
 
+score = 0
+def drawScore():
+    timer = font.render(str(score), True, (0, 0, 0))
+    timePos = timer.get_rect(right = screen.get_rect().right - 10)
+    screen.blit(timer, timePos)
+
 gameStarted = False
 def on_space_press():
     global gameStarted
@@ -41,5 +47,9 @@ while True:
 
     if not gameStarted:
         screen.blit(text, label)
+    else:
+        score += 1
+    drawScore()
 
     pygame.display.flip()
+    clock.tick(60)
