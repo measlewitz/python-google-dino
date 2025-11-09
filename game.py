@@ -12,6 +12,16 @@ def center_window(window):
 
     window.geometry(f"{750}x{250}+{x}+{y}")
 
+gameStarted = False
+
+def on_space_press(event):
+    global gameStarted
+    if not bool(gameStarted):
+        label.pack_forget()
+        gameStarted = True
+    else:
+        print("jumping")
+
 root = Tk()
 root.title("Dino Game")
 center_window(root)
@@ -24,4 +34,5 @@ font = tkFont.Font(family="Arial", size = 25, weight="bold")
 label = Label(root, text = "press the spacebar to start",font=font)
 label.pack(anchor = "center")
 
+root.bind("<space>", on_space_press)
 root.mainloop()
