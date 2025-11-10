@@ -33,6 +33,26 @@ def exit():
     pygame.quit()
     sys.exit()
 
+class dino():
+    pass
+
+class cloud():
+    pass
+
+class cactus():
+    pass
+
+class pterodactyl():
+    pass
+
+speed = 5
+
+ground = pygame.image.load("sprites/ground.png")
+ground_rect = ground.get_rect(
+    centerx=screen.get_rect().centerx,
+    centery=screen.get_rect().centery
+)
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -50,6 +70,7 @@ while True:
     else:
         score += 1
     drawScore()
+    screen.blit(ground, ground_rect)
 
     pygame.display.flip()
     clock.tick(60)
