@@ -1,3 +1,4 @@
+import random
 import sys
 import pygame
 pygame.init()
@@ -80,13 +81,13 @@ class dino(pygame.sprite.Sprite):
     def duck(self):
         self.ducking = True
         self.currentImage += 0.125
-        if (self.currentImage >= 2):
+        if self.currentImage >= 2:
             self.currentImage = 0
         self.image = self.ducking_sprites[int(self.currentImage)]
 
     def run(self):
         self.currentImage += 0.125
-        if(self.currentImage>=2):
+        if self.currentImage>=2:
             self.currentImage = 0
         self.image = self.running_sprites[int(self.currentImage)]
 
@@ -98,20 +99,82 @@ class dino(pygame.sprite.Sprite):
         elif gameStarted:
             self.run()
 
+cloudImage = pygame.image.load("sprites/cloud.png").convert_alpha()
 class cloud(pygame.sprite.Sprite):
-    pass
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = cloudImage
+        self.x = x
+        self.y = y
+        self.rect = self.image.get_rect(center=(self.x, self.y))
 
+    def update(self):
+        self.rect.x -= 1
+
+cacti = []
+for i in range(1,7):
+    cacti.append(pygame.image.load(f"sprites/cacti/cactus{i}.png").convert_alpha())
 class cactus(pygame.sprite.Sprite):
-    pass
+    def __init__(self, x, y):
+        super().__init__()
+        self.x = x
+        self.y = y
+        self.image = random.choice(cacti)
+        self.rect = self.image.get_rect(center=(self.x, self.y))
 
+    def update(self):
+        self.x -= speed
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+
+pteroImages = []
+pteroImages.append(pygame.image.load("sprites/bird1.png").convert_alpha())
+pteroImages.append(pygame.image.load("sprites/bird2.png").convert_alpha())
 class pterodactyl(pygame.sprite.Sprite):
-    pass
+    def __init__(self, x):
+        super().__init__()
+        self.x = x
+        self.y = random.choice([150,170,190])
+        self.yBalanced = True
+        self.image = pteroImages[0]
+        self.currentImage = 0
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+
+    def animate(self):
+        self.currentImage += 0.025
+        if self.currentImage >= 2:
+            self.currentImage = 0
+            self.yBalanced = True
+        elif self.currentImage >= 1:
+            self.yBalanced = False
+        self.new_image(int(self.currentImage))
+
+    def new_image(self, value):
+        if self.image != pteroImages[value]:
+            self.image = pteroImages[value]
+            if self.yBalanced:
+                self.y += 6
+            else:
+                self.y -= 6
+
+
+    def update(self):
+        self.animate()
+        self.x -= speed
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+        global obstacles
+        if self.x <= -50:
+            sprites.remove(self)
+            obstacles -= 1
 
 xPos = 100
 sprites = pygame.sprite.Group()
 
 trex = dino()
 sprites.add(trex)
+
+obstacles = 0
+obstacleTimer = 0
+obstacleCooldown = 1000
 
 ground = pygame.image.load("sprites/ground.png").convert_alpha()
 cover_length = 1201
@@ -159,6 +222,18 @@ while True:
     if(cover_length <= 1200):
         cover_length -= 10
         cover_pos += 10
+
+    if obstacles < 3 and gameStarted and not dead:
+        if pygame.time.get_ticks() - obstacleTimer >= obstacleCooldown:
+            rand = random.randint(1,50)
+            if rand in range(1,6):
+                obstacleTimer = pygame.time.get_ticks()
+                #obstacles += 1
+            elif rand in range(7, 10):
+                obstacleTimer = pygame.time.get_ticks()
+                obstacles += 1
+                ptero = pterodactyl(800)
+                sprites.add(ptero)
 
     drawScore()
     sprites.update()
