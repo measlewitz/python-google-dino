@@ -100,40 +100,50 @@ class dino(pygame.sprite.Sprite):
             self.run()
 
 cloudImage = pygame.image.load("sprites/cloud.png").convert_alpha()
+cloudY = [50,75,100,125,150]
 class cloud(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x):
         super().__init__()
         self.image = cloudImage
         self.x = x
-        self.y = y
+        self.y = random.choices(cloudY, (50,40,30,20,10))[0]
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
     def update(self):
         self.rect.x -= 1
+        global clouds
+        if self.rect.x <= -50:
+            sprites.remove(self)
+            clouds -= 1
 
 cacti = []
 for i in range(1,7):
     cacti.append(pygame.image.load(f"sprites/cacti/cactus{i}.png").convert_alpha())
 class cactus(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x):
         super().__init__()
         self.x = x
-        self.y = y
+        self.y = 190
         self.image = random.choice(cacti)
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
     def update(self):
         self.x -= speed
         self.rect = self.image.get_rect(center=(self.x, self.y))
+        global obstacles
+        if self.x <= -50:
+            sprites.remove(self)
+            obstacles -= 1
 
 pteroImages = []
 pteroImages.append(pygame.image.load("sprites/bird1.png").convert_alpha())
 pteroImages.append(pygame.image.load("sprites/bird2.png").convert_alpha())
+pteroY = [150,170,190]
 class pterodactyl(pygame.sprite.Sprite):
     def __init__(self, x):
         super().__init__()
         self.x = x
-        self.y = random.choice([150,170,190])
+        self.y = random.choices(pteroY, (15,35,50))[0]
         self.yBalanced = True
         self.image = pteroImages[0]
         self.currentImage = 0
@@ -175,6 +185,10 @@ sprites.add(trex)
 obstacles = 0
 obstacleTimer = 0
 obstacleCooldown = 1000
+
+clouds = 0
+cloudTimer = 0
+cloudCooldown = 3000
 
 ground = pygame.image.load("sprites/ground.png").convert_alpha()
 cover_length = 1201
@@ -223,13 +237,23 @@ while True:
         cover_length -= 10
         cover_pos += 10
 
-    if obstacles < 3 and gameStarted and not dead:
-        if pygame.time.get_ticks() - obstacleTimer >= obstacleCooldown:
-            rand = random.randint(1,50)
-            if rand in range(1,6):
+    if gameStarted and not dead:
+        if clouds < 3 and pygame.time.get_ticks() - cloudTimer >= cloudCooldown:
+            rand = random.randint(1, 25)
+            if rand == 1:
+                cloudTimer = pygame.time.get_ticks()
+                clouds += 1
+                clowd = cloud(800)
+                sprites.add(clowd)
+
+        if obstacles < 3 and pygame.time.get_ticks() - obstacleTimer >= obstacleCooldown:
+            rand = random.randint(1,100)
+            if rand in range(1,15):
                 obstacleTimer = pygame.time.get_ticks()
-                #obstacles += 1
-            elif rand in range(7, 10):
+                obstacles += 1
+                cact = cactus(800)
+                sprites.add(cact)
+            elif rand in range(16, 22):
                 obstacleTimer = pygame.time.get_ticks()
                 obstacles += 1
                 ptero = pterodactyl(800)
