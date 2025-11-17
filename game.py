@@ -17,7 +17,9 @@ label = text.get_rect(
 )
 
 score = 0
-def drawScore(last_score=[-1]):
+def drawScore(last_score=None):
+    if last_score is None:
+        last_score = [-1]
     if score != last_score[0]:
         timer = font.render(str(score), True, (0, 0, 0))
     timePos = timer.get_rect(right = screen.get_rect().right - 10)
@@ -36,7 +38,7 @@ class dino(pygame.sprite.Sprite):
         super().__init__()
         self.x = 122
         self.y = 189
-        self.velocity = 17
+        self.velocity = 18
         self.gravity = 1
         self.jumping = False
         self.ducking = False
@@ -56,6 +58,9 @@ class dino(pygame.sprite.Sprite):
 
         if not gameStarted:
             self.image = self.stand
+        else:
+            self.image = self.running_sprites[0]
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
     def jump(self):
@@ -69,7 +74,7 @@ class dino(pygame.sprite.Sprite):
         if self.y >= 189:
             self.y = 189
             self.jumping = False
-            self.velocity = 15
+            self.velocity = 16
             self.gravity = 1
             global gameStarted
             global speed
@@ -92,6 +97,8 @@ class dino(pygame.sprite.Sprite):
         self.image = self.running_sprites[int(self.currentImage)]
 
     def update(self):
+        if dead:
+            return
         if self.jumping:
             self.jump()
         elif self.ducking:
@@ -110,10 +117,12 @@ class cloud(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
     def update(self):
+        if dead:
+            return
         self.rect.x -= 1
         global clouds
         if self.rect.x <= -50:
-            sprites.remove(self)
+            cloud_sprites.remove(self)
             clouds -= 1
 
 cacti = []
@@ -125,6 +134,7 @@ class cactus(pygame.sprite.Sprite):
         self.x = x
         self.y = 190
         self.image = random.choice(cacti)
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
     def update(self):
@@ -132,7 +142,7 @@ class cactus(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(self.x, self.y))
         global obstacles
         if self.x <= -50:
-            sprites.remove(self)
+            obstacle_sprites.remove(self)
             obstacles -= 1
 
 pteroImages = []
@@ -146,6 +156,7 @@ class pterodactyl(pygame.sprite.Sprite):
         self.y = random.choices(pteroY, (15,35,50))[0]
         self.yBalanced = True
         self.image = pteroImages[0]
+        self.mask = pygame.mask.from_surface(self.image)
         self.currentImage = 0
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
@@ -168,19 +179,23 @@ class pterodactyl(pygame.sprite.Sprite):
 
 
     def update(self):
+        if dead:
+            return
         self.animate()
         self.x -= speed
         self.rect = self.image.get_rect(center=(self.x, self.y))
         global obstacles
         if self.x <= -50:
-            sprites.remove(self)
+            obstacle_sprites.remove(self)
             obstacles -= 1
 
 xPos = 100
-sprites = pygame.sprite.Group()
+dino_sprites = pygame.sprite.Group()
+obstacle_sprites = pygame.sprite.Group()
+cloud_sprites = pygame.sprite.Group()
 
 trex = dino()
-sprites.add(trex)
+dino_sprites.add(trex)
 
 obstacles = 0
 obstacleTimer = 0
@@ -205,7 +220,17 @@ while True:
                         cover_length -= 1
                     trex.jump()
                 else:
+                    trex = dino()
+                    dino_sprites.empty()
+                    dino_sprites.add(trex)
+                    obstacle_sprites.empty()
+                    dead = False
+
+                    obstacles = 0
+                    clouds = 0
                     speed = 5
+                    score = 0
+
             elif event.key == pygame.K_DOWN:
                 if gameStarted and not dead and not trex.jumping:
                     trex.ducking = True
@@ -213,16 +238,20 @@ while True:
             elif event.key == pygame.K_ESCAPE:
                 exit()
         if event.type == pygame.KEYUP:
-            if event.key == pygame.K_DOWN:
+            if event.key == pygame.K_DOWN and not dead:
                 trex.ducking = False
                 trex.rect.centery = trex.y
+
+    if pygame.sprite.spritecollide(trex, obstacle_sprites, False, pygame.sprite.collide_mask):
+        dead = True
+        speed = 0
 
     screen.fill((255,255,255))
 
     xPos -= speed
     if not gameStarted:
         screen.blit(text, label)
-    else:
+    elif not dead:
         score += 1
     if score % 100 == 0 and gameStarted and not dead:
         speed = round(speed + 0.1, 1)
@@ -244,7 +273,7 @@ while True:
                 cloudTimer = pygame.time.get_ticks()
                 clouds += 1
                 clowd = cloud(800)
-                sprites.add(clowd)
+                cloud_sprites.add(clowd)
 
         if obstacles < 3 and pygame.time.get_ticks() - obstacleTimer >= obstacleCooldown:
             rand = random.randint(1,100)
@@ -252,16 +281,20 @@ while True:
                 obstacleTimer = pygame.time.get_ticks()
                 obstacles += 1
                 cact = cactus(800)
-                sprites.add(cact)
+                obstacle_sprites.add(cact)
             elif rand in range(16, 22):
                 obstacleTimer = pygame.time.get_ticks()
                 obstacles += 1
                 ptero = pterodactyl(800)
-                sprites.add(ptero)
+                obstacle_sprites.add(ptero)
 
+    cloud_sprites.update()
+    cloud_sprites.draw(screen)
+    obstacle_sprites.update()
+    obstacle_sprites.draw(screen)
+    dino_sprites.update()
+    dino_sprites.draw(screen)
     drawScore()
-    sprites.update()
-    sprites.draw(screen)
 
     pygame.display.flip()
     clock.tick(60)
