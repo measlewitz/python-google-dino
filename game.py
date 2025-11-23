@@ -9,20 +9,25 @@ pygame.display.set_caption("Dino Game")
 clock = pygame.time.Clock()
 
 pygame.font.init()
-font = pygame.font.SysFont("Arial", 25, True)
-text = font.render("press space-bar to start", True, (0,0,0))
-label = text.get_rect(
-    centerx=screen.get_rect().centerx,
-    centery=screen.get_rect().top + 50
-)
+font = pygame.font.Font("sprites/font.ttf", 15)
+def gameOver():
+    text = font.render("GAME OVER", True, (83, 83, 83))
+    label = text.get_rect(
+        centerx=screen.get_rect().centerx,
+        centery=screen.get_rect().top + 50
+    )
+    screen.blit(text, label)
 
 score = 0
 def drawScore(last_score=None):
     if last_score is None:
         last_score = [-1]
     if score != last_score[0]:
-        timer = font.render(str(score), True, (0, 0, 0))
-    timePos = timer.get_rect(right = screen.get_rect().right - 10)
+        timer = font.render(str(score), True, (83, 83, 83))
+    timePos = timer.get_rect(
+        right = screen.get_rect().right - 10,
+        top = screen.get_rect().top + 5,
+    )
     screen.blit(timer, timePos)
 
 def exit():
@@ -209,6 +214,8 @@ ground = pygame.image.load("sprites/ground.png").convert_alpha()
 cover_length = 1201
 cover_pos = xPos
 
+deadImage = pygame.image.load("sprites/dead.png").convert_alpha()
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -245,14 +252,15 @@ while True:
     if pygame.sprite.spritecollide(trex, obstacle_sprites, False, pygame.sprite.collide_mask):
         dead = True
         speed = 0
+        trex.image = deadImage
 
     screen.fill((255,255,255))
 
     xPos -= speed
-    if not gameStarted:
-        screen.blit(text, label)
-    elif not dead:
+    if not dead and gameStarted:
         score += 1
+    elif dead:
+        gameOver()
     if score % 100 == 0 and gameStarted and not dead:
         speed = round(speed + 0.1, 1)
 
