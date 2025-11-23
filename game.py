@@ -6,6 +6,7 @@ pygame.init()
 screen = pygame.display.set_mode((750, 250))
 screen.fill((255,255,255))
 pygame.display.set_caption("Dino Game")
+pygame.display.set_icon(pygame.image.load("sprites/dead.png").convert_alpha())
 clock = pygame.time.Clock()
 
 pygame.font.init()
