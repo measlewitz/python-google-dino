@@ -1,16 +1,21 @@
 import random
-import sys
+import sys, os
 import pygame
-pygame.init()
 
+def resource_path(path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, path)
+    return path
+
+pygame.init()
 screen = pygame.display.set_mode((750, 250))
 screen.fill((255,255,255))
 pygame.display.set_caption("Dino Game")
-pygame.display.set_icon(pygame.image.load("sprites/dead.png").convert_alpha())
+pygame.display.set_icon(pygame.image.load(resource_path("sprites/jump.png")).convert_alpha())
 clock = pygame.time.Clock()
 
 pygame.font.init()
-font = pygame.font.Font("sprites/font.ttf", 15)
+font = pygame.font.Font(resource_path("sprites/font.ttf"), 15)
 def gameOver():
     text = font.render("GAME OVER", True, (83, 83, 83))
     label = text.get_rect(
@@ -49,18 +54,18 @@ class dino(pygame.sprite.Sprite):
         self.jumping = False
         self.ducking = False
 
-        self.stand = pygame.image.load("sprites/stand.png").convert_alpha()
-        self.jumper = pygame.image.load("sprites/jump.png").convert_alpha()
+        self.stand = pygame.image.load(resource_path("sprites/stand.png")).convert_alpha()
+        self.jumper = pygame.image.load(resource_path("sprites/jump.png")).convert_alpha()
 
         self.currentImage = 0
         self.running_sprites = []
         self.ducking_sprites = []
 
-        self.running_sprites.append(pygame.image.load("sprites/run1.png").convert_alpha())
-        self.running_sprites.append(pygame.image.load("sprites/run2.png").convert_alpha())
+        self.running_sprites.append(pygame.image.load(resource_path("sprites/run1.png")).convert_alpha())
+        self.running_sprites.append(pygame.image.load(resource_path("sprites/run2.png")).convert_alpha())
 
-        self.ducking_sprites.append(pygame.image.load("sprites/duck1.png").convert_alpha())
-        self.ducking_sprites.append(pygame.image.load("sprites/duck2.png").convert_alpha())
+        self.ducking_sprites.append(pygame.image.load(resource_path("sprites/duck1.png")).convert_alpha())
+        self.ducking_sprites.append(pygame.image.load(resource_path("sprites/duck2.png")).convert_alpha())
 
         if not gameStarted:
             self.image = self.stand
@@ -112,7 +117,7 @@ class dino(pygame.sprite.Sprite):
         elif gameStarted:
             self.run()
 
-cloudImage = pygame.image.load("sprites/cloud.png").convert_alpha()
+cloudImage = pygame.image.load(resource_path("sprites/cloud.png")).convert_alpha()
 cloudY = [50,75,100,125,150]
 class cloud(pygame.sprite.Sprite):
     def __init__(self, x):
@@ -133,7 +138,7 @@ class cloud(pygame.sprite.Sprite):
 
 cacti = []
 for i in range(1,7):
-    cacti.append(pygame.image.load(f"sprites/cacti/cactus{i}.png").convert_alpha())
+    cacti.append(pygame.image.load(resource_path(f"sprites/cacti/cactus{i}.png")).convert_alpha())
 class cactus(pygame.sprite.Sprite):
     def __init__(self, x):
         super().__init__()
@@ -152,8 +157,8 @@ class cactus(pygame.sprite.Sprite):
             obstacles -= 1
 
 pteroImages = []
-pteroImages.append(pygame.image.load("sprites/bird1.png").convert_alpha())
-pteroImages.append(pygame.image.load("sprites/bird2.png").convert_alpha())
+pteroImages.append(pygame.image.load(resource_path("sprites/bird1.png")).convert_alpha())
+pteroImages.append(pygame.image.load(resource_path("sprites/bird2.png")).convert_alpha())
 pteroY = [150,170,190]
 class pterodactyl(pygame.sprite.Sprite):
     def __init__(self, x):
@@ -211,11 +216,11 @@ clouds = 0
 cloudTimer = 0
 cloudCooldown = 3000
 
-ground = pygame.image.load("sprites/ground.png").convert_alpha()
+ground = pygame.image.load(resource_path("sprites/ground.png")).convert_alpha()
 cover_length = 1201
 cover_pos = xPos
 
-deadImage = pygame.image.load("sprites/dead.png").convert_alpha()
+deadImage = pygame.image.load(resource_path("sprites/dead.png")).convert_alpha()
 
 while True:
     for event in pygame.event.get():
