@@ -16,6 +16,7 @@ clock = pygame.time.Clock()
 
 pygame.font.init()
 font = pygame.font.Font(resource_path("sprites/font.ttf"), 15)
+
 def gameOver():
     text = font.render("GAME OVER", True, (83, 83, 83))
     label = text.get_rect(
@@ -25,6 +26,7 @@ def gameOver():
     screen.blit(text, label)
 
 score = 0
+highscore = 0
 def drawScore(last_score=None):
     if last_score is None:
         last_score = [-1]
@@ -35,6 +37,16 @@ def drawScore(last_score=None):
         top = screen.get_rect().top + 5,
     )
     screen.blit(timer, timePos)
+
+    if dead:
+        global highscore
+        highscore = score if highscore < score else highscore
+        hi = font.render("HI " + str(highscore), True, (83, 83, 83))
+        hiLabel = hi.get_rect(
+            right=screen.get_rect().right - timer.get_width() - 30,
+            top=screen.get_rect().top + 5
+        )
+        screen.blit(hi, hiLabel)
 
 def exit():
     pygame.quit()
@@ -159,7 +171,7 @@ class cactus(pygame.sprite.Sprite):
 pteroImages = []
 pteroImages.append(pygame.image.load(resource_path("sprites/bird1.png")).convert_alpha())
 pteroImages.append(pygame.image.load(resource_path("sprites/bird2.png")).convert_alpha())
-pteroY = [150,170,190]
+pteroY = [150,165,190]
 class pterodactyl(pygame.sprite.Sprite):
     def __init__(self, x):
         super().__init__()
@@ -269,6 +281,8 @@ while True:
         gameOver()
     if score % 100 == 0 and gameStarted and not dead:
         speed = round(speed + 0.1, 1)
+        if obstacleCooldown >= 255:
+            obstacleCooldown -= 5
 
     screen.blit(ground, (xPos, 200))
     screen.blit(ground, (xPos + 1200, 200))
