@@ -1,4 +1,5 @@
 Created on November 8th 2025
+
 Finished on November 23rd 2025
 
 Learned python, git, github, and pyinstaller
